@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"os"
+
+	"brewjenkins/go-ai-insight-advisor/cmd"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
