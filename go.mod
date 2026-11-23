@@ -3,9 +3,11 @@ module brewjenkins/go-ai-insight-advisor
 go 1.26.10
 
 require (
+	github.com/caarlos0/env/v11 v11.4.2
 	github.com/gin-contrib/cors v1.7.11
 	github.com/gin-contrib/requestid v1.0.10
 	github.com/gin-gonic/gin v1.12.0
+	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.10.2
 )
 

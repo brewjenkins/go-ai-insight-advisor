@@ -24,7 +24,10 @@ var listenCmd = &cobra.Command{
 	Use:   "listener",
 	Short: "Start the HTTP server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cfg := config.NewConfig()
+		cfg, err := config.Load()
+		if err != nil {
+			return err
+		}
 		logger := newLogger(cfg.App.Env)
 
 		// TODO: open PostgreSQL *sql.DB from config and defer db.Close().
