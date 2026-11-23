@@ -1,4 +1,4 @@
-package domain
+package constant
 
 const (
 	// Mode Development indicates that the application is running in development mode.

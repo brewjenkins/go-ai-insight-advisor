@@ -15,7 +15,7 @@ import (
 
 	"brewjenkins/go-ai-insight-advisor/internal/app"
 	"brewjenkins/go-ai-insight-advisor/internal/config"
-	"brewjenkins/go-ai-insight-advisor/internal/domain"
+	"brewjenkins/go-ai-insight-advisor/internal/domain/constant"
 
 	"github.com/spf13/cobra"
 )
@@ -78,7 +78,7 @@ var listenCmd = &cobra.Command{
 }
 
 func newLogger(env string) *slog.Logger {
-	if env == domain.MODE_PRODUCTION {
+	if env == constant.MODE_PRODUCTION {
 		return slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	}
 	return slog.New(slog.NewTextHandler(os.Stdout, nil))

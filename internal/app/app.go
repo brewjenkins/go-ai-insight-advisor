@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"brewjenkins/go-ai-insight-advisor/internal/config"
-	"brewjenkins/go-ai-insight-advisor/internal/domain"
+	"brewjenkins/go-ai-insight-advisor/internal/domain/constant"
 	"brewjenkins/go-ai-insight-advisor/internal/module/employee"
 
 	"github.com/gin-contrib/cors"
@@ -20,7 +20,7 @@ func NewRouter(cfg *config.Config, db *sql.DB, logger *slog.Logger) *gin.Engine 
 	if logger == nil {
 		logger = slog.Default()
 	}
-	if cfg != nil && cfg.App.Env == domain.MODE_PRODUCTION {
+	if cfg != nil && cfg.App.Env == constant.MODE_PRODUCTION {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
