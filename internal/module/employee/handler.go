@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"brewjenkins/go-ai-insight-advisor/internal/domain/constant"
+	"brewjenkins/go-ai-insight-advisor/internal/password"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,22 +24,27 @@ type Handler struct {
 	logger *slog.Logger
 }
 
-func NewHandler(svc EmployeeService) *Handler {
+func NewHandler(svc EmployeeService, logger *slog.Logger) *Handler {
 	return &Handler{
-		svc: svc,
+		svc:    svc,
+		logger: logger,
 	}
 }
 
 func (h *Handler) Create(c *gin.Context) {
 	var req CreateEmployeeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": constant.BAD_REQUEST})
 		return
 	}
 
 	emp, err := h.svc.CreateEmployee(c.Request.Context(), req)
+	if errors.Is(err, password.ErrInvalidLength) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": constant.BAD_REQUEST})
+		return
+	}
 	if errors.Is(err, ErrEmailTaken) {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		c.JSON(http.StatusConflict, gin.H{"error": ErrEmailTaken.Error()})
 		return
 	}
 	if err != nil {

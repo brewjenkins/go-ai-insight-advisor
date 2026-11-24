@@ -1,22 +1,23 @@
 package app
 
 import (
-	"database/sql"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"brewjenkins/go-ai-insight-advisor/internal/config"
 	"brewjenkins/go-ai-insight-advisor/internal/domain/constant"
+	"brewjenkins/go-ai-insight-advisor/internal/module/authentication"
 	"brewjenkins/go-ai-insight-advisor/internal/module/employee"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 )
 
 // NewRouter builds the Gin engine, attaches core middleware, and registers module routes.
-func NewRouter(cfg *config.Config, db *sql.DB, logger *slog.Logger) *gin.Engine {
+func NewRouter(cfg *config.Config, db *sqlx.DB, logger *slog.Logger) *gin.Engine {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -34,7 +35,8 @@ func NewRouter(cfg *config.Config, db *sql.DB, logger *slog.Logger) *gin.Engine 
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	employee.RegisterRoutes(r, db)
+	authentication.RegisterRoutes(r, logger, db)
+	employee.RegisterRoutes(r, db, logger)
 
 	return r
 }

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,6 +14,7 @@ import (
 
 	"brewjenkins/go-ai-insight-advisor/internal/app"
 	"brewjenkins/go-ai-insight-advisor/internal/config"
+	"brewjenkins/go-ai-insight-advisor/internal/database"
 	"brewjenkins/go-ai-insight-advisor/internal/domain/constant"
 
 	"github.com/spf13/cobra"
@@ -30,8 +30,16 @@ var listenCmd = &cobra.Command{
 		}
 		logger := newLogger(cfg.App.Env)
 
-		// TODO: open PostgreSQL *sql.DB from config and defer db.Close().
-		var db *sql.DB
+		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer stop()
+
+		startupCtx, cancelStartup := context.WithTimeout(ctx, 10*time.Second)
+		defer cancelStartup()
+		db, err := database.OpenPostgres(startupCtx, cfg.Postgres)
+		if err != nil {
+			return fmt.Errorf("open PostgreSQL: %w", err)
+		}
+		defer db.Close()
 
 		router := app.NewRouter(cfg, db, logger)
 		addr := net.JoinHostPort(cfg.App.Server.Host, cfg.App.Server.Port)
@@ -44,9 +52,6 @@ var listenCmd = &cobra.Command{
 			WriteTimeout:      30 * time.Second,
 			IdleTimeout:       60 * time.Second,
 		}
-
-		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-		defer stop()
 
 		errCh := make(chan error, 1)
 		go func() {

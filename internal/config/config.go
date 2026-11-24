@@ -20,8 +20,18 @@ type AppConfig struct {
 	CorsAllowedOrigins []string `mapstructure:"cors_allowed_origins" env:"APP_CORS_ALLOWED_ORIGINS"`
 }
 
+type PostgresConfig struct {
+	Host     string `mapstructure:"host" env:"POSTGRES_HOST"`
+	Port     string `mapstructure:"port" env:"POSTGRES_PORT"`
+	User     string `mapstructure:"user" env:"POSTGRES_USER"`
+	Password string `mapstructure:"password" env:"POSTGRES_PASSWORD"`
+	DBName   string `mapstructure:"dbname" env:"POSTGRES_DB"`
+	SSLMode  string `mapstructure:"sslmode" env:"POSTGRES_SSLMODE"`
+}
+
 type Config struct {
-	App AppConfig `mapstructure:"app"`
+	App      AppConfig      `mapstructure:"app"`
+	Postgres PostgresConfig `mapstructure:"postgres"`
 }
 
 func NewConfig() *Config {
@@ -34,6 +44,12 @@ func NewConfig() *Config {
 	}
 	cfg.App.Server.Host = "localhost"
 	cfg.App.Server.Port = "8080"
+	cfg.Postgres.Host = "localhost"
+	cfg.Postgres.Port = "5432"
+	cfg.Postgres.User = "postgres"
+	cfg.Postgres.Password = "password"
+	cfg.Postgres.DBName = "postgres"
+	cfg.Postgres.SSLMode = "disable"
 	return cfg
 }
 

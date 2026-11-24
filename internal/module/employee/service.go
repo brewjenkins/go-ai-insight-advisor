@@ -2,19 +2,21 @@ package employee
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log/slog"
+
+	"brewjenkins/go-ai-insight-advisor/internal/password"
 )
 
 // EmployeeRepository is the consumer-side contract required by Service.
 type EmployeeRepository interface {
 	Create(ctx context.Context, emp *Employee) error
 	FindByID(ctx context.Context, id int64) (*Employee, error)
+	FindByEmail(ctx context.Context, email string) (*Employee, error)
 }
 
 type Service struct {
-	repo   EmployeeRepository
-	logger *slog.Logger
+	repo EmployeeRepository
 }
 
 func NewService(repo EmployeeRepository) *Service {
@@ -24,12 +26,26 @@ func NewService(repo EmployeeRepository) *Service {
 }
 
 func (s *Service) CreateEmployee(ctx context.Context, req CreateEmployeeRequest) (*Employee, error) {
-	emp := &Employee{
-		Name:  req.Name,
-		Email: req.Email,
+	_, err := s.repo.FindByEmail(ctx, req.Email)
+	if err == nil {
+		return nil, ErrEmailTaken
 	}
+	if !errors.Is(err, ErrNotFound) {
+		return nil, fmt.Errorf("check existing employee: %w", err)
+	}
+
+	hash, err := password.Hash(req.Password)
+	if err != nil {
+		return nil, fmt.Errorf("hash employee password: %w", err)
+	}
+
+	emp := &Employee{
+		Name:         req.Name,
+		Email:        req.Email,
+		PasswordHash: hash,
+	}
+
 	if err := s.repo.Create(ctx, emp); err != nil {
-		s.logger.Error("failed to create employee", "error", err)
 		return nil, fmt.Errorf("create employee: %w", err)
 	}
 	return emp, nil
